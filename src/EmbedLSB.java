@@ -97,8 +97,8 @@ public class EmbedLSB {
         // Embed the binary message into pixel LSBs
         EncodeMessageBinaryInPixels(pixels, messageInBinary);
 
-        // Apply modified pixels to the new buffered image
-        ReplacePixelsInNewBufferedImage(pixels, stegoImage);
+        // Apply modified pixels to the new buffered image (only update altered pixels for speed)
+        ReplacePixelsInNewBufferedImage(pixels, stegoImage, requiredPixels);
         return stegoImage;
     }
 
@@ -229,8 +229,10 @@ public class EmbedLSB {
         );
     }
 
-    private static void ReplacePixelsInNewBufferedImage(Pixel[] newPixels, BufferedImage newImage) {
-        for (Pixel pixel : newPixels) {
+    private static void ReplacePixelsInNewBufferedImage(Pixel[] newPixels, BufferedImage newImage, int modifiedPixelCount) {
+        int limit = Math.min(newPixels.length, modifiedPixelCount);
+        for (int i = 0; i < limit; i++) {
+            Pixel pixel = newPixels[i];
             newImage.setRGB(pixel.getX(), pixel.getY(), pixel.getColor().getRGB());
         }
     }

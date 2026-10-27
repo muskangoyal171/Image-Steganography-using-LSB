@@ -178,8 +178,10 @@ public class PvdSteganography {
                     }
                 }
 
-                int newRgb1 = (newP0[2] << 16) | (newP0[1] << 8) | newP0[0];
-                int newRgb2 = (newP1[2] << 16) | (newP1[1] << 8) | newP1[0];
+                int alpha1 = (rgb1 & 0xFF000000) != 0 ? (rgb1 & 0xFF000000) : 0xFF000000;
+                int alpha2 = (rgb2 & 0xFF000000) != 0 ? (rgb2 & 0xFF000000) : 0xFF000000;
+                int newRgb1 = alpha1 | (newP0[2] << 16) | (newP0[1] << 8) | newP0[0];
+                int newRgb2 = alpha2 | (newP1[2] << 16) | (newP1[1] << 8) | newP1[0];
 
                 stegoImage.setRGB(x, y, newRgb1);
                 stegoImage.setRGB(x + 1, y, newRgb2);
@@ -233,11 +235,16 @@ public class PvdSteganography {
                     // Check if 32-bit header is available
                     if (targetPayloadChars == -1 && extractedBits.length() >= 32) {
                         String headerBits = extractedBits.substring(0, 32);
-                        targetPayloadChars = Integer.parseInt(headerBits, 2);
-                        if (targetPayloadChars <= 0 || targetPayloadChars > width * height) {
-                            return ""; // Invalid header or not a PVD stego-image
+                        try {
+                            long lengthVal = Long.parseLong(headerBits, 2);
+                            if (lengthVal <= 0 || lengthVal > (long) width * height) {
+                                return ""; // Invalid header or not a PVD stego-image
+                            }
+                            targetPayloadChars = (int) lengthVal;
+                            targetBits = 32 + (targetPayloadChars * 8);
+                        } catch (NumberFormatException e) {
+                            return ""; // Malformed header
                         }
-                        targetBits = 32 + (targetPayloadChars * 8);
                     }
 
                     if (targetBits != -1 && extractedBits.length() >= targetBits) {

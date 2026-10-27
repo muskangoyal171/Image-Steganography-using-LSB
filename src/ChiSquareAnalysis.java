@@ -110,8 +110,9 @@ public class ChiSquareAnalysis {
             double expected = (n2k + n2k1) / 2.0;
 
             if (expected > 0) {
-                double diff = n2k - expected;
-                chiSquare += (diff * diff) / expected;
+                double diff0 = n2k - expected;
+                double diff1 = n2k1 - expected;
+                chiSquare += ((diff0 * diff0) + (diff1 * diff1)) / expected;
                 activePairs++;
             }
         }

@@ -131,10 +131,15 @@ public class LsbAnalysis {
             }
         }
 
-        double expectedRuns = 1.0 + (2.0 * n1 * n0) / (double) totalPixels;
-        double varRuns = (2.0 * n1 * n0 * (2.0 * n1 * n0 - totalPixels)) /
-                ((double) totalPixels * totalPixels * (totalPixels - 1));
-        double runsZScore = (varRuns > 0) ? (runs - expectedRuns) / Math.sqrt(varRuns) : 0.0;
+        double runsZScore;
+        if (n1 == 0 || n0 == 0) {
+            runsZScore = 100.0; // Complete absence of variation (extreme non-randomness)
+        } else {
+            double expectedRuns = 1.0 + (2.0 * n1 * n0) / (double) totalPixels;
+            double varRuns = (2.0 * n1 * n0 * (2.0 * n1 * n0 - totalPixels)) /
+                    ((double) totalPixels * totalPixels * (totalPixels - 1));
+            runsZScore = (varRuns > 0) ? (runs - expectedRuns) / Math.sqrt(varRuns) : 0.0;
+        }
 
         // 5. Compute Suspicion Score (0.0% to 100.0%)
         // Indicators of steganography:

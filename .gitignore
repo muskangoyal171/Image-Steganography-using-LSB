@@ -1,0 +1,15 @@
+# Compiled class files
+*.class
+out/
+
+# Log files
+*.log
+
+# IntelliJ IDEA & IDE configuration
+.idea/
+*.iml
+.vscode/
+
+# Generated artifacts & outputs
+pictures/out/
+*.tmp
