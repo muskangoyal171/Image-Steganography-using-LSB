@@ -1,232 +1,252 @@
-# Secure Data Transfer Over Internet Using Image Steganography 
+# Secure Image Steganography & Steganalysis Suite
+
+This project is a Java-based steganography toolkit that lets you hide a secret message inside an image, recover it later, check whether an image contains hidden data, and compare different steganographic techniques.
 
-This project is a Java program that is focused on implementing form of steganography using the Least Significant Bit (LSB) method for hiding a message within an image file with the purpose of secure data transfer over internet. It includes methods for ecrypting the text, embedding the text into the image, extracting the text from the resulting picture and decrypting it.
+It combines:
 
-## Research:
+- LSB (Least Significant Bit) embedding and extraction
+- PVD (Pixel Value Differencing) steganography
+- AES-256-GCM authenticated encryption
+- PBKDF2 password-based key derivation
+- Steganalysis checks for hidden payloads
+- Benchmarking and CSV export for algorithm comparison
 
-• Steganography is a technique of hiding a message or data within another non-secret message or data (image, audio file, or video). Cryptography makes a message unreadable by encoding it, steganography hides the existence of the message.
+The application is designed as a command-line research tool and is best suited for PNG images where the least significant bits can be preserved safely.
 
-• If we want to transfer data over the internet securely using image steganography, that means that we need to embed sensitive information into a digital image in such a way that the presence of the hidden data is not detectable to unauthorized users.
+---
 
-• Even if the image is hacked by a hacker, we wouldn’t want him to be able to read the data. For that purpose, we need to encrypt the data before embedding it using a cryptographic algorithm. [1]
+## Why this project is useful
 
-• The encrypted data needs to be embedded into the pixels of the image using steganographic techniques. The resulting image appears identical or very similar to the original image to the human eye, but it contains the encrypted data hidden within its pixels.
+You can use it to:
 
-• Upon receiving the steganographically altered image, the recipient can extract the hidden data. But the recipient also needs to know the encryption key to decrypt the data after extracting it.
+- hide a secret message inside a cover image
+- recover the message securely with the same password
+- detect suspicious images using steganalysis
+- compare LSB and PVD under different payload sizes
+- export evaluation data for analysis in spreadsheets or reports
 
-• The hidden data should remain intact and recoverable even if the cover medium undergoes compression, cropping, or noise addition.
-### Types and techniques of image steganography:
-Steganographic techniques that modify image files for hiding information are: 
+---
 
-• Spatial domain; 
+## Key features
 
--	JPEG compression
+### Secure embedding
 
--	JPEG Steganography
+- Encrypts plaintext using AES-256-GCM
+- Derives the key with PBKDF2WithHmacSHA256
+- Generates a random salt and IV for every message
+- Embeds the encrypted payload into image pixels
+- Saves the result as a PNG to avoid lossy compression issues
 
--	Wavelet transform method
+### Secure extraction
 
--	Least Significant Bit (LSB) embedding falls under the category of spatial domain steganographic techniques.
+- Reads the hidden payload from the stego image
+- Verifies the AES-GCM authentication tag
+- Rejects tampered payloads or incorrect passwords with a security warning
 
-• Transform domain; 
+### Steganalysis
 
-• Spread spectrum; 
+- LSB statistical analysis
+- Chi-square analysis
+- RS analysis
+- DCT-based analysis
+- Suspicion scoring and formatted reports
 
-• Statistical techniques; and 
+### Experimental evaluation
 
-• Distortion techniques.
+- Compares LSB vs PVD at 1%, 5%, 10%, and 20% payload sizes
+- Reports PSNR, SSIM, extraction success, and suspicion score
+- Writes results to `evaluation_results.csv`
 
-Steganographic techniques that modify the image file format involve: 
+---
 
-• Fle embedding and
+## Project structure
 
-• Palette embedding. 
+```text
+Image-Steganography-using-LSB/
+├── src/
+│   ├── Main.java
+│   ├── EmbedLSB.java
+│   ├── ExtractLSB.java
+│   ├── TextEncryptor.java
+│   ├── TextDecryptor.java
+│   ├── Steganalyzer.java
+│   ├── SteganalysisReport.java
+│   ├── LsbAnalysis.java
+│   ├── ChiSquareAnalysis.java
+│   ├── RSAnalysis.java
+│   ├── DctAnalysis.java
+│   ├── PvdSteganography.java
+│   ├── ExperimentRunner.java
+│   ├── ExperimentResult.java
+│   ├── ImageQualityMetrics.java
+│   └── Pixel.java
+├── pictures/
+│   └── input/
+│       └── cute_dog.png
+├── README.md
+├── evaluation_results.csv
+├── lib/
+├── .idea/
+└── .iml file
+```
 
-Techniques that modify the elements in the visual image: 
+---
 
-• Image generation technique and
+## Requirements
 
-• Image element modification technique.
+- Java 17 or newer
+- A PNG image for embedding
+- A password that you will use for both encryption and decryption
 
-There is also a special type of the spatial and transform domain techniques called the adaptive steganography technique. [2]
- 
-### Least Significant Bit (LSB):
+---
 
-LSB (Least Significant Bit) image steganography – we change the least significant bit of a pixel value, so that it has minimal impact on the image's visual appearance. LSB steganography is one of the simplest methods for hiding information within digital media, such as images.
-Each pixel is defined by 3 channels: Red, Green, Blue (RGB), each of them represented by 1 byte. If we change the last one bit of the pixel (the Least Significant Bit), the two colors will be pretty similar. Even if they’re joined, we won’t be able to see the difference, meaning the final image will look much similar to the original one.
-If we want to encode a single letter, we need to get the decimal value for the letter from the ASCII table and convert it into binary form. The binary form of letters has 8 bits, and we can store 3 bits per pixel, meaning to encode one letter in a picture, we will need 3 pixels, only changing the last bit. [3]
+## How it works
 
-Sources:
+### 1. Encryption and key derivation
+The project uses:
 
-• [1] https://nevonprojects.com/secure-data-transfer-over-internet-using-image-steganography/#:~:text=What%20this%20system%20does%20is,be%20able%20to%20read%20the 
+- PBKDF2WithHmacSHA256 for password-based key derivation
+- a 16-byte random salt
+- a 12-byte random IV
+- AES-256-GCM for authenticated encryption
+- a GMAC authentication tag to detect tampering
 
-• [2] https://www.cscjournals.org/manuscript/Journals/IJCSS/Volume6/Issue3/IJCSS-670.pdf 
+### 2. Embedding the payload
+The encrypted payload is converted into binary and embedded into the least significant bits of image pixels. The LSB implementation uses a 3-pixel-per-character design for the hidden message payload.
 
-• [3] https://medium.com/@renantkn/lsb-steganography-hiding-a-message-in-the-pixels-of-an-image-4722a8567046 
+### 3. Extraction and verification
+When extracting, the program reads the hidden bits back from the image, validates the payload, and decrypts the original message with the same password.
 
-## About the project:
+### 4. Steganalysis
+The analysis tools inspect the image for signs of hidden content using LSB statistics, Chi-square testing, RS analysis, and DCT-based forensic checks.
 
-This project consists of the following:
+---
 
-• A Java program with the following components:
+## Quick start
 
-  -	User input: The user can choose if they want to embed a secret message into an image or if they want to read a secret message from an image. They can write a secret message which they would like to embedd into an image, the location path of the image which they would like to use and the destination path of the image which will contain the embedded message. They can also write the secret key and the cipher algorithm if they choose to read a secret message from an image. 
+### Compile the project
 
-  -	Data Encryption: After the user writes the message that they would like to hide, the message is encrypted using symmetric encryption (AES) and encoded using Base64. This step ensures security so that even if someone is able to extract the hidden data from the image, they won’t be able to read it.
+Windows PowerShell:
 
-  -	Data Embedding: After encrypting the data, the encrypted data is embedded into the pixels of the image using LSB method.
+```powershell
+javac -d out $(Get-ChildItem -Path src -Filter *.java | Select-Object -ExpandProperty FullName)
+```
 
-  -	Data Extraction: The user can also extract a secret message from an image, but after extraction the message is in encrypted form. It needs to be decrypted for the user to be able to read it.
+macOS/Linux:
 
-  -	Data Decryption: After extraction the next step is decryption, but to do that, the user needs to know the secret key which was used to encrypt the data. After providing the secret key and the cipher algorithm used, the user is now able to read the secret message which is displayed in the console.
+```bash
+javac -d out src/*.java
+```
 
-• Documentation: The documentation is the file that you are currently reading. It includes the research that I’ve done, how the project works, how to use it and sources I have used to create it.
+### Run the app
 
-## Programming Language and Libraries:
+```bash
+java -cp out Main
+```
 
-Programming language: Java, JDK version 17
+---
 
-IDE used: IntelliJ IDEA
+## Menu options
 
-Libraries:
+When the app starts, it shows four choices:
 
-1.	Java Standard Library.
+- A: Encrypt and embed a secret message into an image
+- B: Extract, authenticate, and decrypt a message from an image
+- C: Run steganalysis on an image
+- D: Run experiments and compare algorithms
 
-2.	javax.imageio: API for reading and writing images in various formats.
+### Option A: Embed a message
 
-3.	java.awt: Classes for creating and managing graphical user interface components.
+The program asks for:
 
-4.	java.io: This package provides classes for input and output operations.
+1. the message to hide
+2. the password
+3. the source image path
+4. the output stego-image path
 
-5.	java.util.ArrayList
+Example input:
 
-6.	java.lang
+```text
+A
+Hello hidden world!
+secret123
+pictures/input/cute_dog.png
+pictures/out/stego.png
+```
 
-7.	javax.crypto.Cipher: Functionality for encryption and decryption using cryptographic algorithms.
+### Option B: Extract and decrypt a message
 
-8.	javax.crypto.KeyGenerator: This class is used to generate secret keys for symmetric encryption algorithms (AES). 
+The program asks for:
 
-9.	javax.crypto.SecretKey: This interface represents a secret symmetric key used for encryption and decryption. 
+1. the stego image path
+2. the decryption password
 
-10.	java.nio.charset.StandardCharsets: This class provides constants for charset names defined by the IANA character set registry.
+Example input:
 
-11.	java.security.Signature: This class provides the functionality for generating and verifying digital signatures. 
+```text
+B
+pictures/out/stego.png
+secret123
+```
 
-12.	java.util.Base64: This class provides methods for encoding and decoding data in Base64 format.
+If the image was modified or the password is wrong, the application reports a security alert rather than returning plaintext.
 
-13.	java.util.Scanner
+### Option C: Run steganalysis
 
-## Installation and starting the project:
+Provide the image path you want to inspect. The tool analyzes the image using LSB, Chi-square, RS, and DCT methods and prints a structured forensic report.
 
-To set up the project, follow these steps:
+### Option D: Run benchmark experiments
 
-1.Clone the project repository from GitHub: https://github.com/MonikaJov/Image-Steganography-using-LSB 
+Provide:
 
-2.Open the file as IntelliJ IDEA project
+- the cover image path
+- the CSV output path
 
-3.Run the project
+The runner compares LSB and PVD at 1%, 5%, 10%, and 20% payload sizes and exports the results to CSV.
 
-3.Write in console
+---
 
-## System Architecture:
+## Example workflow
 
-### class Main:
+Run the app:
 
-When we run the main program, we are given a choice whether we want to write a hidden message to an image or read a hidden message from an image.
-If we chose that we want to write a hidden message to an image, then we need to enter our message in console, the image location and the destination path. Then the method Generate_image is called where the message is encrypted with the encrypt method from the TextEncryptor class and then the method Embed from the EmbedLSB class is called, which embeds a message into the pixels of the image.
-If we chose that we want to read a hidden message from an image, then we need to enter our secret keys in console, the image location. Then the method Extract from the ExtractLSB class is called which extracts the hidden message and then decrypts it using the decrypt method from the TextDecryptor class.
+```bash
+java -cp out Main
+```
 
-### class EmbedLSB:
+Then choose:
 
-This class embeds a message into an image using LSB steganography, where the message is hidden within the least significant bits of the images pixel data.
+```text
+A
+Hello hidden world!
+secret123
+pictures/input/cute_dog.png
+pictures/out/stego.png
+```
 
-•	Embed: Is the entry point for embedding a message into an image. It takes three parameters: the original image file, the message to be embedded, and the file path for the new image with the embedded message.
+To recover the message later:
 
-•	GetImage: Creates a copy of the original image.
+```text
+B
+pictures/out/stego.png
+secret123
+```
 
-•	GetPixelArray: Extracts the pixel data from the buffered image into an array of Pixel objects.
+---
 
-•	ConvertMessageToBinary: Converts the original message in binary format.
+## Important usage notes
 
-•	ConvertAsciiToBinary: Converts ASCII values to binary strings.
+- Use a lossless image format such as PNG for embedding.
+- Keep the same password for both embedding and extraction.
+- Do not edit the stego image after embedding, or the integrity check will fail.
+- Benchmark output is stored in `evaluation_results.csv`.
 
-•	LeftPadZeros: Pads binary strings to ensure they are 8 bits long.
+---
 
-•	EncodeMessageBinaryInPixels: Embeds the binary message into the pixel data.
+## References
 
-•	ChangePixelsColor: Modifies the RGB values of pixels to encode the message.
-
-•	GetPixelsRGBBinary: Converts pixel RGB values to binary strings.
-
-•	ChangePixelBinary: Modifies the least significant bit of a binary string.
-
-•	GetNewPixelColor: Constructs a new Color object from modified RGB binary strings.
-
-•	ReplacePixelsInNewBufferedImage: Replaces original pixels in a new buffered image with modified pixels.
-
-•	SaveNewFile: Saves the new image.
-
-### class ExtractLSB:
-
-This class to extracts the hidden message from an image that has been encoded using the LSB (least significant bit) steganography method.
-
-•	Extract: This method is the entry point for extracting a message from an image. It takes three parameters: the file path of the image containing the hidden message, a secret key, and a cipher object for decryption.
-
-•	GetPixelArray: Extracts the pixel data from the buffered image into an array of Pixel objects, similar to the Embed method in the EmbedLSB class.
-
-•	ExtractMessageFromPixels: Extracts the hidden message from the least significant bit of the RGB values of the pixels.
-
-•	ConvertPixelsToCharacter: Converts groups of three pixels into a character by extracting the least significant bit of their RGB values.
-
-•	TurnPixelIntegersToBinary: Converts the RGB integer values of a pixel into binary strings.
-
-•	IsEndOfMessage: Checks if the end of the message has been reached.
-
-•	ConvertBinaryValuesToCharacter: Converts a list of binary strings into a character.
-
-•	RemovePaddedZeros: Removes any padding from the binary representation of a character.
-
-### class TextEncryptor:
-
-This class encrypts text using symmetric encryption (AES) and encode the encrypted data using Base64.
-
-•	generateAESKey: This method generates a secret key for AES encryption. 
-
-•	getCipher: This method gets an instance of the AES cipher. 
-
-•	encrypt: This method encrypts the input text using the secret key and cipher object.
-
-•	CreatingASignatureObject: It's meant to demonstrate the creation of a signature object using SHA256 with RSA. However, it's not used.
-
-### class TextDecryptor:
-
-This class decrypts text that has been encrypted using symmetric encryption (AES) and encoded using Base64.
-
-decrypt: This method decrypts the input Base64-encoded cipher text using the provided secret key and cipher object.
-
-### Sources:
-
-• Tutorial for the embedding text in images and extractiong text from images using LSB: https://www.youtube.com/watch?v=e4xphUB0Ptg 
-
-• Tutorial for encryption of text: https://www.tutorialspoint.com/java_cryptography/java_cryptography_encrypting_data.htm 
-
-• Tutorial for decryption of text: https://www.tutorialspoint.com/java_cryptography/java_cryptography_decrypting_data.htm 
-
-### Screenshots:
-
-![image](https://github.com/MonikaJov/Image-Steganography-using-LSB/assets/86190069/49f06053-261c-4f80-8ac2-ebdc30fa4c18)
-
-![image](https://github.com/MonikaJov/Image-Steganography-using-LSB/assets/86190069/7dfa88c5-705e-439b-84fe-2bfae0accffa)
-
-Original image vs image with hidden message:
-
-![image](https://github.com/MonikaJov/Image-Steganography-using-LSB/assets/86190069/e9843225-1045-4c64-adac-3ea3111b6e8d)
-
-![image](https://github.com/MonikaJov/Image-Steganography-using-LSB/assets/86190069/948a0059-4f60-4c61-a14f-9bfec7a293a2)
-
-The image with a hidden message is a little bigger than the orifginal image.
-
-![image](https://github.com/MonikaJov/Image-Steganography-using-LSB/assets/86190069/dc5d5dac-ea92-4ec7-a80a-0e5ef3de2e1b)
-
-![image](https://github.com/MonikaJov/Image-Steganography-using-LSB/assets/86190069/cd0d887a-a622-494a-95fe-2bbb26da635b)
-
+- D.-C. Wu and W.-H. Tsai, "A Steganographic Method for Images by Pixel-Value Differencing"
+- J. Fridrich, M. Goljan, and R. Du, "Detecting LSB Steganography in Color and Gray-Scale Images"
+- A. Westfeld and A. Pfitzmann, "Attacks on Steganographic Systems"
+- NIST SP 800-38D, "Recommendation for Block Cipher Modes of Operation: GCM and GMAC"
+- RFC 8018, "PKCS #5: Password-Based Cryptography Specification Version 2.1"
